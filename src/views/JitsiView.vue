@@ -446,7 +446,7 @@ export default {
   },
   watch: {
     userData: {
-      handler(newVal, oldVal) {
+      handler(newVal) {
         console.log('userData', newVal);
         this.isRecorder = this.meetingData.recorder == (this.userData || {}).uid;
         this.joinMeetingName = (this.userData || {}).name || 'Guest' + Math.floor(Math.random() * 1000000);

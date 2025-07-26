@@ -204,12 +204,6 @@
 import { ref, onMounted, computed } from 'vue'
 import { marked } from 'marked'
 
-interface Transcription {
-  meeting_id: string
-  transcription: string
-  outline: string
-}
-
 // 定義 props
 const props = defineProps({
   user: {

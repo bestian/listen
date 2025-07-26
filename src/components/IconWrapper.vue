@@ -8,7 +8,7 @@ import * as LucideIcons from 'lucide-vue-next'
 
 interface Props {
   name: string
-  size?: number | string
+  size?: number
   class?: string
 }
 
