@@ -52,7 +52,7 @@
 
             <!-- 訊息內容 -->
             <div class="flex-1 min-w-0">
-              <div class="text-sm text-gray-500 mb-2">
+              <div class="text-sm text-gray-500 mb-2" v-if="getSpeaker(message) || getDateTime(message)">
                 {{ getSpeaker(message) }} {{ getDateTime(message) }}
               </div>
               <div class="text-gray-900 leading-relaxed whitespace-pre-wrap break-all">
@@ -71,12 +71,11 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 
 const route = useRoute()
-const router = useRouter()
 
 // 定義 props
 const props = defineProps({
@@ -91,15 +90,18 @@ const props = defineProps({
 })
 
 // 從路由參數獲取會議ID
-const meetingId = computed(() => route.params.meeting_id)
+const meetingId = computed(() => {
+  const id = route.params.meeting_id
+  return Array.isArray(id) ? id[0] : id
+})
 
 // 響應式數據
 const loading = ref(true)
 const error = ref('')
-const transcriptionContent = ref([])
+const transcriptionContent = ref<string[]>([])
 
 // 格式化會議ID (20250621 -> 2025-06-21)
-const formatMeetingId = (meetingId) => {
+const formatMeetingId = (meetingId: string) => {
   if (meetingId.length === 8) {
     return `${meetingId.substring(0, 4)}-${meetingId.substring(4, 6)}-${meetingId.substring(6, 8)}`
   }
@@ -107,17 +109,62 @@ const formatMeetingId = (meetingId) => {
 }
 
 // 取得發言者
-const getSpeaker = (message) => {
-  return message.split('\n')[0].replace(/^\[.+?\]/, '').replace(/:.+$/, '')
+const getSpeaker = (message: string) => {
+  const lines = message.split('\n')
+  const firstLine = lines[0]
+
+  // 檢查是否有時間戳格式 [時間] 發言者: 內容
+  const timestampMatch = firstLine.match(/^\[(.+?)\]\s*(.+?):\s*(.*)/)
+  if (timestampMatch) {
+    return timestampMatch[2].trim()
+  }
+
+  // 檢查是否有簡單的 發言者: 內容 格式
+  const simpleMatch = firstLine.match(/^(.+?):\s*(.*)/)
+  if (simpleMatch) {
+    return simpleMatch[1].trim()
+  }
+
+  // 如果都沒有，返回空字串（表示沒有明確發言者）
+  return ''
 }
 
-const getDateTime = (message) => {
-  return message.split('\n')[0].replace(/\].+?$/, ']')
+const getDateTime = (message: string) => {
+  const lines = message.split('\n')
+  const firstLine = lines[0]
+
+  // 檢查是否有時間戳格式 [時間] 發言者: 內容
+  const timestampMatch = firstLine.match(/^\[(.+?)\]\s*(.+?):\s*(.*)/)
+  if (timestampMatch) {
+    return `[${timestampMatch[1]}]`
+  }
+
+  // 如果沒有時間戳，返回空字串
+  return ''
 }
 
-const dropSpeakerAndDateTime = (message) => {
-  const speaker = getSpeaker(message)
-  return message.split(speaker)[1].replace(': ', '')
+const dropSpeakerAndDateTime = (message: string) => {
+  const lines = message.split('\n')
+  const firstLine = lines[0]
+
+  // 檢查是否有時間戳格式 [時間] 發言者: 內容
+  const timestampMatch = firstLine.match(/^\[(.+?)\]\s*(.+?):\s*(.*)/)
+  if (timestampMatch) {
+    const content = timestampMatch[3]
+    const remainingLines = lines.slice(1)
+    return [content, ...remainingLines].join('\n').trim()
+  }
+
+  // 檢查是否有簡單的 發言者: 內容 格式
+  const simpleMatch = firstLine.match(/^(.+?):\s*(.*)/)
+  if (simpleMatch) {
+    const content = simpleMatch[2]
+    const remainingLines = lines.slice(1)
+    return [content, ...remainingLines].join('\n').trim()
+  }
+
+  // 如果都沒有，返回整個訊息（包括第一行）
+  return message
 }
 
 // 載入逐字稿內容
@@ -145,7 +192,7 @@ const loadTranscriptionContent = async () => {
   }
 }
 
-const getPhotoURL = (speaker) => {
+const getPhotoURL = (speaker: string) => {
   if (props.userData && props.userData.name == speaker.replace(/\s+/g, '')) {
     return props.userData.photoURL
   }
