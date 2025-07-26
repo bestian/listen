@@ -1,0 +1,137 @@
+<template>
+  <header id="navbar" class="bg-black text-white sticky top-0 z-10">
+    <div class="w-full px-4 md:mx-auto">
+      <div class="flex justify-between items-center h-16">
+        <router-link to="/" class="flex items-center">
+          <span class="text-xl font-bold">深度聆聽</span>
+        </router-link>
+
+        <div class="hidden lg:flex items-center space-x-1 md:space-x-2 lg:space-x-6 xl:space-x-10">
+          <router-link
+            v-for="item in navItems"
+            :key="item.href"
+            :to="item.href"
+            class="hover:text-democratic-red transition flex items-center gap-1"
+            :class="{ 'text-democratic-red': $route.path === item.href }"
+          >
+            <IconWrapper :name="item.icon" :size="16" :stroke="'#ffffff'" />
+            <span>{{ item.label }}</span>
+          </router-link>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <!-- 登入狀態顯示 -->
+          <div v-if="user" class="flex items-center space-x-2">
+            <router-link
+              to="/profile"
+              class="flex items-center space-x-2 hover:text-democratic-red transition"
+              title="個人資料"
+            >
+              <img
+                v-if="userData && userData.photoURL"
+                :src="userData.photoURL"
+                :alt="userData.name"
+                class="w-8 h-8 rounded-full hover:ring-2 hover:ring-democratic-red transition"
+              />
+              <div v-else class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center hover:bg-democratic-red transition">
+                <span class="text-white text-xs">👤</span>
+              </div>
+              <span class="text-sm hidden lg:block">{{ userData && userData.name }}</span>
+            </router-link>
+          </div>
+
+          <!-- 未登入顯示登入按鈕 -->
+          <div v-else>
+            <button @click="handleShowLogin" class="text-sm hover:text-democratic-red transition">
+              登入
+            </button>
+          </div>
+
+          <button @click="toggleMobileMenu" class="lg:hidden text-white" title="Menu" name="Menu">
+            <IconWrapper name="menu" :size="24" color="white" />
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div v-show="mobileMenuOpen" class="lg:hidden bg-black border-t border-gray-700">
+      <div class="w-full px-4 md:container md:mx-auto py-3">
+        <router-link
+          v-for="item in navItems"
+          :key="item.href"
+          :to="item.href"
+          class="flex items-center gap-2 py-2 hover:text-democratic-red transition"
+          :class="{ 'text-democratic-red': $route.path === item.href }"
+          @click="mobileMenuOpen = false"
+        >
+          <IconWrapper :name="item.icon" :size="16" :stroke="'#ffffff'" />
+          <span>{{ item.label }}</span>
+        </router-link>
+
+        <button v-if="user" @click="handleLogout" class="flex items-center gap-2 py-2 hover:text-democratic-red transition">
+          <IconWrapper name="log-out" :size="16" :stroke="'#ffffff'" />
+          登出
+        </button>
+      </div>
+    </div>
+  </header>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { useRoute } from 'vue-router'
+import IconWrapper from './IconWrapper.vue'
+
+const route = useRoute()
+const mobileMenuOpen = ref(false)
+
+const navItems = [
+  { href: '/', label: '首頁', icon: 'home' },
+  { href: '/meeting', label: '視訊會議', icon: 'video' },
+  { href: '/transcription', label: '逐字稿', icon: 'file-text' },
+  { href: '/profile', label: '個人資料', icon: 'user' },
+]
+
+const toggleMobileMenu = () => {
+  mobileMenuOpen.value = !mobileMenuOpen.value
+}
+
+// 接收來自 App.vue 的用戶資料
+const props = defineProps({
+  user: {
+    type: Object,
+    default: null
+  },
+  userData: {
+    type: Object,
+    default: null
+  }
+})
+
+// 發送事件給 App.vue
+const emit = defineEmits(['logout', 'show-login'])
+
+const handleLogout = () => {
+  emit('logout')
+}
+
+const handleShowLogin = () => {
+  emit('show-login')
+}
+</script>
+
+<style scoped>
+/* Header styles */
+#navbar {
+  z-index: 999;
+}
+/* 使用 router-link-exact-active class 來標示當前路由 */
+.router-link-exact-active {
+  color: #D80000 !important; /* democratic-red 顏色 */
+}
+
+/* 確保圖示也會變色 */
+.router-link-exact-active .icon-wrapper {
+  color: #D80000 !important;
+}
+</style>

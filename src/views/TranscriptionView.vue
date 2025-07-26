@@ -1,0 +1,518 @@
+<template>
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+      <!-- 頁面標題 -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">逐字稿管理</h1>
+        <p class="text-gray-600">查看和管理所有會議逐字稿</p>
+      </div>
+
+      <!-- 上傳區域 -->
+      <div v-if="props.user" class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h2 class="text-xl font-semibold mb-4">上傳逐字稿</h2>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              選擇檔案
+            </label>
+            <input
+              type="file"
+              ref="fileInput"
+              @change="handleFileSelect"
+              accept=".txt,.srt,.md"
+              class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+          </div>
+          <button
+            @click="uploadTranscription"
+            :disabled="!selectedFile || uploading"
+            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+          >
+            {{ uploading ? '上傳中...' : '上傳逐字稿' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- 未登入提示 -->
+      <div v-else class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-8">
+        <div class="flex items-center">
+          <svg class="w-5 h-5 text-yellow-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+          </svg>
+          <p class="text-yellow-700">請先登入才能上傳逐字稿</p>
+        </div>
+      </div>
+
+      <!-- 載入狀態 -->
+      <div v-if="loading" class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+
+      <!-- 錯誤訊息 -->
+      <div v-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+        {{ error }}
+      </div>
+
+      <!-- 逐字稿列表 -->
+      <div v-if="!loading && transcriptions.length > 0" class="space-y-4">
+        <h2 class="text-xl font-semibold mb-4">逐字稿列表</h2>
+
+        <input type="text" v-model="search" placeholder="搜尋..." class="w-full p-2 border border-gray-300 rounded-md mb-4" />
+
+        <div class="gap-4 flex flex-col-reverse">
+          <div
+            v-for="transcription in filteredTranscriptions"
+            :key="transcription.meeting_id"
+            class="bg-white rounded-lg shadow-md p-6 border border-gray-200 relative"
+          >
+            <!-- 樣稿標籤 -->
+            <div v-if="transcription.meeting_id === '20250621'" class="absolute -top-2 -right-2 z-10">
+              <div class="bg-yellow-400 text-black text-xs font-bold px-3 py-1 transform rotate-12 shadow-md">
+                樣稿
+              </div>
+            </div>
+
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                  會議ID: {{ transcription.meeting_id }}
+                </h3>
+                <div class="text-gray-600 text-sm mb-4">
+                  <div v-html="getRenderedOutlinePreview(transcription.outline)" class="prose prose-sm max-w-none"></div>
+                </div>
+              </div>
+
+              <div class="flex space-y-4 ml-4 flex-col">
+                <button
+                  @click="showOutline(transcription.outline, transcription.meeting_id)"
+                  class="px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700"
+                >
+                  查看大綱
+                </button>
+                <button
+                  @click="$router.push(`/transcription_detail/${transcription.meeting_id}`)"
+                  class="px-3 py-1 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700"
+                >
+                  查看詳情
+                </button>
+                <button
+                  @click="downloadTranscription(transcription.meeting_id)"
+                  class="px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+                >
+                  下載
+                </button>
+
+                <!-- 複製逐字稿連結 -->
+                <button
+                  @click="copyTranscriptionLink(transcription.meeting_id)"
+                  class="px-3 py-1 bg-gray-600 text-white text-sm rounded-md hover:bg-gray-700"
+                >
+                  複製連結
+                </button>
+              </div>
+            </div>
+
+            <div class="text-xs text-gray-500 mt-2">
+              檔案名稱: transcript-{{ formatMeetingId(transcription.meeting_id) }}.txt
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 空狀態 -->
+      <div v-if="!loading && transcriptions.length === 0" class="text-center py-12">
+        <p class="text-gray-500">目前沒有逐字稿</p>
+      </div>
+    </div>
+
+    <!-- 大綱彈出視窗 -->
+    <div
+      v-if="showOutlineModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      @click="closeOutlineModal"
+    >
+      <div
+        class="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-y-auto"
+        @click.stop
+      >
+        <div class="p-6 border-b border-gray-200">
+          <div class="flex justify-between items-center">
+            <h3 class="text-xl font-semibold">會議大綱 - {{ currentOutlineMeetingId }}</h3>
+            <button
+              @click="closeOutlineModal"
+              class="text-gray-400 hover:text-gray-600"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="p-6 overflow-y-auto max-h-[60vh]">
+          <div id="renderedOutline" v-if="!editing" v-html="renderedOutline" class="prose prose-sm max-w-none"></div>
+          <textarea
+            v-else
+            v-model="myOutline"
+            class="w-full h-full min-h-[200px] max-h-[60vh] border-2 border-black rounded p-2 text-sm resize-vertical"
+          ></textarea>
+        </div>
+
+        <div class="p-6 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center">
+          <button
+            @click="copyOutline"
+            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center space-x-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+            </svg>
+            <span>複製</span>
+          </button>
+          <button
+            v-if="userData && (userData.uid)"
+            @click="toggleEditOutline"
+            class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center space-x-2"
+          >
+            <svg v-if="!editing" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+            </svg>
+            <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5v14h14V5H5zm4 0v4h6V5H9zm0 6v6h6v-6H9z"></path>
+            </svg>
+            <span v-if="!editing">編輯</span>
+            <span v-else>儲存並結束編輯</span>
+          </button>
+          <button v-if="editing"
+            @click="cancelEditOutline"
+            class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+          >
+            取消
+          </button>
+          <button
+            @click="closeOutlineModal"
+            class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+          >
+            關閉
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, computed } from 'vue'
+import { marked } from 'marked'
+
+interface Transcription {
+  meeting_id: string
+  transcription: string
+  outline: string
+}
+
+// 定義 props
+const props = defineProps({
+  user: {
+    type: Object,
+    default: null
+  },
+  userData: {
+    type: Object,
+    default: null
+  }
+})
+
+// 配置 marked 選項
+marked.setOptions({
+  breaks: true, // 支援換行
+  gfm: true, // GitHub Flavored Markdown
+})
+
+// 計算用戶是否有管理員權限
+const isAdmin = computed(() => {
+  return props.userData && (props.userData.isAdmin === true || props.userData.isSuperAdmin === true)
+})
+
+// 響應式數據
+const transcriptions = ref([])
+const loading = ref(true)
+const error = ref('')
+const uploading = ref(false)
+const selectedFile = ref(null)
+const fileInput = ref()
+
+// 大綱彈出視窗相關
+const showOutlineModal = ref(false)
+const currentOutline = ref('')
+const currentOutlineMeetingId = ref('')
+const editing = ref(false)
+const myOutline = ref('')
+
+// 搜尋
+const search = ref('')
+
+// 過濾逐字稿
+const filteredTranscriptions = computed(() => {
+  if (!search.value) return transcriptions.value
+  return transcriptions.value.filter(t =>
+    t.meeting_id.includes(search.value) ||
+    t.outline.includes(search.value)
+  )
+})
+
+// 渲染 Markdown 內容
+const renderedOutline = computed(() => {
+  if (!currentOutline.value) return ''
+  return marked(currentOutline.value)
+})
+
+// 渲染大綱預覽（截斷後的markdown）
+const getRenderedOutlinePreview = (outline) => {
+  if (!outline) return ''
+  return marked(outline)
+}
+
+// 載入逐字稿列表
+const loadTranscriptions = async () => {
+  try {
+    loading.value = true
+    error.value = ''
+
+    const response = await fetch('https://listen-transcription-worker.bestian123.workers.dev/api/query-table')
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const data = await response.json()
+    transcriptions.value = data
+  } catch (err) {
+    console.error('載入逐字稿失敗:', err)
+    error.value = '載入逐字稿失敗，請稍後再試'
+  } finally {
+    loading.value = false
+  }
+}
+
+// 處理檔案選擇
+const handleFileSelect = (event) => {
+  const target = event.target
+  if (target.files && target.files.length > 0) {
+    selectedFile.value = target.files[0]
+  }
+}
+
+// 提取會議ID從檔案名稱
+const extractMeetingIdFromFilename = (filename) => {
+  // 假設檔案名稱格式為 transcript-2025-06-21.txt
+  const match = filename.match(/transcript-(\d{4}-\d{2}-\d{2})/)
+  if (match) {
+    return match[1].replace(/-/g, '') // 轉換為 20250621 格式
+  }
+  return ''
+}
+
+// 檢查會議ID是否已存在
+const checkMeetingExists = (meetingId) => {
+  return transcriptions.value.some(t => t.meeting_id === meetingId)
+}
+
+// 上傳逐字稿
+const uploadTranscription = async () => {
+  if (!selectedFile.value) {
+    alert('請先選擇檔案')
+    return
+  }
+
+  const meetingId = extractMeetingIdFromFilename(selectedFile.value.name)
+  if (!meetingId) {
+    alert('檔案名稱格式錯誤，應為 transcript-YYYY-MM-DD.txt')
+    return
+  }
+
+  // 檢查是否已存在
+  if (checkMeetingExists(meetingId)) {
+    if (!isAdmin.value) {
+      alert('此會議逐字稿已存在，需要管理員權限才能更新')
+      return
+    }
+
+    if (!window.confirm(`會議 ${meetingId} 的逐字稿已存在，確定要更新嗎？`)) {
+      return
+    }
+  }
+
+  try {
+    uploading.value = true
+
+    const formData = new FormData()
+    formData.append('file', selectedFile.value)
+
+    const response = await fetch('https://listen-transcription-worker.bestian123.workers.dev/api/upload-transcription', {
+      method: 'POST',
+      body: formData
+    })
+
+    if (!response.ok) {
+      throw new Error(`上傳失敗: ${response.status}`)
+    }
+
+    alert('上傳成功')
+
+    // 重新載入列表
+    await loadTranscriptions()
+
+    // 清除檔案選擇
+    selectedFile.value = null
+    if (fileInput.value) {
+      fileInput.value.value = ''
+    }
+
+  } catch (err) {
+    console.error('上傳失敗:', err)
+    alert('上傳失敗，請重試')
+  } finally {
+    uploading.value = false
+  }
+}
+
+// 顯示大綱
+const showOutline = (outline, meetingId) => {
+  currentOutline.value = outline
+  currentOutlineMeetingId.value = meetingId
+  showOutlineModal.value = true
+}
+
+// 關閉大綱視窗
+const closeOutlineModal = () => {
+  showOutlineModal.value = false
+  currentOutline.value = ''
+  currentOutlineMeetingId.value = ''
+  editing.value = false
+  myOutline.value = ''
+}
+
+// 複製大綱到剪貼簿
+const copyOutline = async () => {
+  try {
+    await navigator.clipboard.writeText(currentOutline.value)
+    alert('大綱已複製到剪貼簿')
+  } catch (err) {
+    console.error('複製失敗:', err)
+    // 降級方案：使用傳統方法
+    const textArea = document.createElement('textarea')
+    textArea.value = currentOutline.value
+    document.body.appendChild(textArea)
+    textArea.select()
+    try {
+      document.execCommand('copy')
+      alert('大綱已複製到剪貼簿')
+    } catch (fallbackErr) {
+      console.error('降級複製也失敗:', fallbackErr)
+      alert('複製失敗')
+    }
+    document.body.removeChild(textArea)
+  }
+}
+
+// 複製逐字稿連結
+const copyTranscriptionLink = (meetingId) => {
+  const url = `https://listen-r2.bestian.tw/${meetingId}.txt`
+  navigator.clipboard.writeText(url)
+  alert('連結已複製到剪貼簿')
+}
+
+const startEditOutline = () => {
+  if (!isAdmin.value) {
+    alert('需要管理員權限才能編輯大綱')
+    return
+  }
+  myOutline.value = currentOutline.value
+  editing.value = true
+}
+
+const endEditOutline = async () => {
+  try {
+    const response = await fetch('https://listen-transcription-worker.bestian123.workers.dev/api/update-outline', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        meeting_id: currentOutlineMeetingId.value,
+        outline: myOutline.value
+      })
+    })
+
+    if (response.ok) {
+      currentOutline.value = myOutline.value
+
+      // 同時更新逐字稿列表中的大綱
+      const transcriptionIndex = transcriptions.value.findIndex(t => t.meeting_id === currentOutlineMeetingId.value)
+      if (transcriptionIndex !== -1) {
+        transcriptions.value[transcriptionIndex].outline = myOutline.value
+      }
+
+      myOutline.value = ''
+      editing.value = false
+      alert('大綱更新成功')
+    } else {
+      throw new Error('更新失敗')
+    }
+  } catch (error) {
+    console.error('更新大綱失敗:', error)
+    alert('更新大綱失敗，請重試')
+  }
+}
+
+const cancelEditOutline = () => {
+  editing.value = false
+  myOutline.value = ''
+}
+
+// 編輯逐字稿
+const toggleEditOutline = async () => {
+  if (!editing.value) {
+    startEditOutline()
+  } else {
+    await endEditOutline()
+  }
+}
+
+// 下載逐字稿
+const downloadTranscription = (meetingId) => {
+  const url = `https://listen-r2.bestian.tw/${meetingId}.txt`
+  fetch(url, {
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+    },
+  }).then(response => {
+    response.text().then(text => {
+      const link = document.createElement('a')
+      link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(text)
+      link.target = '_blank'
+      link.download = `transcript-${formatMeetingId(meetingId)}.txt`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    })
+  })
+}
+
+// 格式化會議ID (20250621 -> 2025-06-21)
+const formatMeetingId = (meetingId) => {
+  if (meetingId.length === 8) {
+    return `${meetingId.substring(0, 4)}-${meetingId.substring(4, 6)}-${meetingId.substring(6, 8)}`
+  }
+  return meetingId
+}
+
+// 組件掛載時載入數據
+onMounted(() => {
+  loadTranscriptions()
+})
+</script>
+
+<style scoped>
+/* 自定義樣式如果需要 */
+</style>

@@ -10,6 +10,26 @@ const router = createRouter({
       component: HomeView,
     },
     {
+      path: '/transcription',
+      name: 'transcription',
+      component: () => import('../views/TranscriptionView.vue'),
+    },
+    {
+      path: '/transcription_detail/:meeting_id',
+      name: 'transcription_detail',
+      component: () => import('../views/TranscriptionDetailView.vue'),
+    },
+    {
+      path: '/meeting',
+      name: 'meeting',
+      component: () => import('../views/JitsiView.vue'),
+    },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: () => import('../views/ProfileView.vue'),
+    },
+    {
       path: '/about',
       name: 'about',
       // route level code-splitting
