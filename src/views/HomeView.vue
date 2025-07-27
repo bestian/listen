@@ -10,11 +10,11 @@ import { RouterLink } from 'vue-router'
         透過即時逐字稿記錄，讓每次對話都更有意義
       </p>
 
-      <div class="grid md:grid-cols-3 gap-8 mb-12">
+      <div class="grid md:grid-cols-2 gap-8 mb-12">
         <div class="bg-white p-6 rounded-lg shadow-md">
           <h3 class="text-xl font-semibold text-gray-900 mb-4">視訊會議</h3>
-          <p class="text-gray-600 mb-4">
-            整合Jitsi Meet視訊會議系統，支援多人同時參與討論
+          <p class="text-gray-600 mb-4 text-left">
+            視訊會議系統，支援多人同時參與討論，可即時記錄逐字稿
           </p>
           <RouterLink
             to="/meeting"
@@ -26,27 +26,14 @@ import { RouterLink } from 'vue-router'
 
         <div class="bg-white p-6 rounded-lg shadow-md">
           <h3 class="text-xl font-semibold text-gray-900 mb-4">逐字稿管理</h3>
-          <p class="text-gray-600 mb-4">
-            查看和管理所有會議逐字稿，支援上傳、編輯和下載
+          <p class="text-gray-600 mb-4 text-left">
+            查看和管理所有會議逐字稿，支援上傳、AI自動摘要、編輯和下載
           </p>
           <RouterLink
             to="/transcription"
             class="inline-block px-6 py-3 bg-democratic-red text-white rounded-lg hover:bg-democratic-red/90 transition-colors"
           >
             管理逐字稿
-          </RouterLink>
-        </div>
-
-        <div class="bg-white p-6 rounded-lg shadow-md">
-          <h3 class="text-xl font-semibold text-gray-900 mb-4">即時逐字稿</h3>
-          <p class="text-gray-600 mb-4">
-            自動記錄會議內容，支援編輯、匯出和搜尋功能
-          </p>
-          <RouterLink
-            to="/meeting"
-            class="inline-block px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            查看逐字稿
           </RouterLink>
         </div>
       </div>

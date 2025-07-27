@@ -5,7 +5,7 @@
         <div>
           <h3 class="text-lg font-semibold mb-4">深度聆聽</h3>
           <p class="text-gray-400">
-            透過即時逐字稿記錄，讓每次對話都更有意義
+            透過逐字稿記錄，讓每次對話都更有意義
           </p>
         </div>
 
@@ -20,17 +20,12 @@
         </div>
 
         <div>
-          <h3 class="text-lg font-semibold mb-4">聯絡我們</h3>
+          <h3 class="text-lg font-semibold mb-4">聯絡</h3>
           <ul class="space-y-2 text-gray-400">
-            <li>GitHub</li>
-            <li>電子郵件</li>
-            <li>社群</li>
+            <li>GitHub：<a class="text-underline" href="https://github.com/bestian/listen" target="_blank">https://github.com/bestian/listen</a></li>
+            <li>Email：<a class="text-underline" href="mailto:bestian@gmail.com" target="_blank">bestian@gmail.com</a></li>
           </ul>
         </div>
-      </div>
-
-      <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-        <p>&copy; {{ new Date().getFullYear() }} 深度聆聽. 版權所有。</p>
       </div>
     </div>
   </footer>
