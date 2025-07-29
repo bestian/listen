@@ -28,7 +28,7 @@
             :disabled="!selectedFile || uploading"
             class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
-            {{ uploading ? '上傳中...' : '上傳逐字稿' }}
+            {{ uploading ? '上傳中...由AI摘要中，請稍後...' : '上傳逐字稿' }}
           </button>
         </div>
       </div>
