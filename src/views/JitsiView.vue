@@ -355,10 +355,13 @@ export default {
       audioStream: null,             // 音訊流
       audioChunks: [],               // 錄音片段
       audioRecordingTimer: null,     // 錄音計時器
-      maxRecordingTime: 120000,       // 最大錄音時間（毫秒）- 120秒
+      maxRecordingTime: 60 * 1000,       // 最大錄音時間（毫秒）- 60秒
       recordingTimeLeft: 0,          // 剩餘錄音時間（秒）
       countdownInterval: null,       // 倒計時間隔
       transcriptionApiUrl: 'https://listen-transcription-worker.bestian123.workers.dev/api/transcription/',
+      autoRestartRecording: false,   // 是否自動重新開始錄音
+      isPageVisible: true,           // 頁面是否可見
+      backgroundRecordingEnabled: true, // 是否啟用背景錄音功能
       isTranscripting: false,        // 是否正在轉錄
 
       // 音訊設定相關
@@ -402,6 +405,7 @@ export default {
     this.joinMeetingName = (this.userData || {}).name || 'Guest' + Math.floor(Math.random() * 1000000);
 
     window.addEventListener('resize', this.handleResize);
+    document.addEventListener('visibilitychange', this.handleVisibilityChange);
 
     // 載入音訊設備和設定
     this.loadAudioDevices();
@@ -440,6 +444,7 @@ export default {
 
     // 清理視窗大小變化監聽器
     window.removeEventListener('resize', this.handleResize);
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange);
 
     // 清理設備變更監聽器
     navigator.mediaDevices.removeEventListener('devicechange', this.handleDeviceChange);
@@ -765,22 +770,27 @@ export default {
       try {
         console.log('🎤 開始音訊錄製...');
 
-        // 請求音訊權限（使用選擇的音訊設備）
-        const audioConstraints = {
-          echoCancellation: true,
-          noiseSuppression: true,
-          sampleRate: 44100
-        };
+        // 如果已經有音訊流且正在自動重啟，直接使用現有的
+        if (this.autoRestartRecording && this.audioStream) {
+          console.log('🔄 使用現有音訊流重新開始錄音');
+        } else {
+          // 請求音訊權限（使用選擇的音訊設備）
+          const audioConstraints = {
+            echoCancellation: true,
+            noiseSuppression: true,
+            sampleRate: 44100
+          };
 
-        // 如果有選擇的音訊設備，則使用該設備
-        if (this.selectedAudioDeviceId) {
-          audioConstraints.deviceId = { exact: this.selectedAudioDeviceId };
+          // 如果有選擇的音訊設備，則使用該設備
+          if (this.selectedAudioDeviceId) {
+            audioConstraints.deviceId = { exact: this.selectedAudioDeviceId };
+          }
+
+          this.audioStream = await navigator.mediaDevices.getUserMedia({
+            audio: audioConstraints,
+            video: false
+          });
         }
-
-        this.audioStream = await navigator.mediaDevices.getUserMedia({
-          audio: audioConstraints,
-          video: false
-        });
 
         // 清空之前的錄音片段
         this.audioChunks = [];
@@ -821,6 +831,16 @@ export default {
         // 設置自動停止計時器
         this.audioRecordingTimer = setTimeout(() => {
           console.log('⏰ 錄音時間到達上限，自動停止...');
+
+          // 檢查頁面是否可見，決定是否自動重新開始
+          if (!this.isPageVisible && this.backgroundRecordingEnabled) {
+            console.log('📱 頁面不在焦點，將自動重新開始錄音');
+            this.autoRestartRecording = true;
+
+            // 發送瀏覽器通知
+            this.sendBrowserNotification('轉錄已自動重啟', '頁面不在焦點時，轉錄功能已自動重新開始');
+          }
+
           this.stopAudioRecording();
         }, this.maxRecordingTime);
 
@@ -855,6 +875,24 @@ export default {
         this.isRecordingAudio = false;
         this.recordingTimeLeft = 0;
 
+        // 檢查是否需要自動重新開始錄音
+        if (this.autoRestartRecording && !this.isPageVisible && this.backgroundRecordingEnabled) {
+          console.log('🔄 頁面不在焦點，自動重新開始錄音...');
+
+          // 發送瀏覽器通知
+          this.sendBrowserNotification('已繼續轉錄', '音訊轉錄已自動重新開始');
+
+          // 延遲0.3秒後重新開始錄音
+          setTimeout(() => {
+            this.startAudioRecording();
+          }, 300);
+        } else {
+          // 只有在頁面可見或手動停止時才重設自動重新開始標誌
+          if (this.isPageVisible) {
+            this.autoRestartRecording = false;
+          }
+        }
+
         console.log('✅ 音訊錄製已停止');
       } catch (error) {
         console.error('❌ 停止錄音時發生錯誤:', error);
@@ -875,8 +913,13 @@ export default {
         // 發送到轉錄服務
         await this.sendAudioToTranscription(audioBlob);
 
-        // 清理資源
-        this.cleanupAudioRecording();
+        // 只有在手動停止或頁面可見時才清理資源
+        if (!this.autoRestartRecording) {
+          console.log('🧹 手動停止，清理音訊資源');
+          this.cleanupAudioRecording();
+        } else {
+          console.log('🔄 自動重啟模式，保持音訊資源');
+        }
       } catch (error) {
         console.error('❌ 處理錄音時發生錯誤:', error);
       }
@@ -1191,6 +1234,48 @@ export default {
         });
       } catch (error) {
         console.error('Error loading meeting data:', error);
+      }
+    },
+
+    handleVisibilityChange() {
+      const wasVisible = this.isPageVisible;
+      this.isPageVisible = !document.hidden;
+      console.log('Page visibility changed:', this.isPageVisible);
+
+      // 如果從不可見變為可見，且正在自動重啟錄音，則停止自動重啟
+      if (wasVisible === false && this.isPageVisible === true && this.autoRestartRecording) {
+        console.log('📱 頁面重新可見，停止自動重啟模式');
+        this.autoRestartRecording = false;
+
+        // 發送通知告知用戶
+        this.sendBrowserNotification('轉錄模式已切換', '頁面重新可見，轉錄已切換為手動模式');
+      }
+
+      // 如果從可見變為不可見，且正在錄音，則啟用自動重啟
+      if (wasVisible === true && this.isPageVisible === false && this.isRecordingAudio && this.backgroundRecordingEnabled) {
+        console.log('📱 頁面變為不可見，啟用自動重啟模式');
+        this.autoRestartRecording = true;
+
+        // 發送通知告知用戶
+        this.sendBrowserNotification('轉錄模式已切換', '頁面不在焦點，轉錄已切換為自動模式');
+      }
+    },
+
+    sendBrowserNotification(title, message) {
+      if (Notification.permission === 'granted') {
+        new Notification(title, {
+          body: message,
+          icon: 'https://listen.bestian.tw/favicon-32x32.png' // 替換為您的網站圖標 URL
+        });
+      } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            new Notification(title, {
+              body: message,
+              icon: 'https://listen.bestian.tw/favicon-32x32.png'
+            });
+          }
+        });
       }
     }
   }
