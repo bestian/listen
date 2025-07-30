@@ -264,8 +264,8 @@ const currentOutlineMeetingId = ref('')
 const editing = ref(false)
 const myOutline = ref('')
 
-// 搜尋
-const search = ref('')
+// 搜尋 如果有 query 則設為 query
+const search = ref(new URLSearchParams(window.location.search).get('meeting_id') || '')
 
 // 過濾逐字稿
 const filteredTranscriptions = computed(() => {
@@ -433,7 +433,8 @@ const copyOutline = async () => {
 
 // 複製逐字稿連結
 const copyTranscriptionLink = (meetingId: string) => {
-  const url = `https://listen-r2.bestian.tw/${meetingId}.txt`
+  const url = `https://listen.bestian.tw/transcription?meeting_id=${meetingId}`
+  // const url = `https://listen-r2.bestian.tw/${meetingId}.txt`
   navigator.clipboard.writeText(url)
   alert('連結已複製到剪貼簿')
 }

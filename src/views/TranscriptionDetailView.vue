@@ -3,7 +3,7 @@
     <div class="max-w-4xl mx-auto">
       <!-- 頁面標題 -->
       <div class="mb-8">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-2">
           <div>
             <h1 class="text-3xl font-bold text-gray-900 mb-2">
               逐字稿詳情 - {{ formatMeetingId(meetingId) }}
@@ -18,6 +18,15 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
             <span>返回列表</span>
+          </button>
+          <button
+            @click="copyTranscriptionLink(meetingId)"
+            class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center space-x-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+            </svg>
+            <span>複製連結</span>
           </button>
         </div>
       </div>
@@ -66,6 +75,27 @@
       <!-- 空狀態 -->
       <div v-if="!loading && !error && transcriptionContent.length === 0" class="text-center py-12">
         <p class="text-gray-500">沒有找到逐字稿內容</p>
+      </div>
+
+      <div class="flex flex-col md:flex-row items-center justify-between gap-2 mt-4">
+        <button
+          @click="$router.push('/transcription')"
+          class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 flex items-center space-x-2"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          <span>返回列表</span>
+        </button>
+        <button
+          @click="copyTranscriptionLink(meetingId)"
+          class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center space-x-2"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+          </svg>
+          <span>複製連結</span>
+        </button>
       </div>
     </div>
   </div>
@@ -197,6 +227,12 @@ const getPhotoURL = (speaker: string) => {
     return props.userData.photoURL
   }
   return ''
+}
+
+const copyTranscriptionLink = (meetingId: string) => {
+  const url = `https://listen.bestian.tw/transcription_detail/${meetingId}`
+  navigator.clipboard.writeText(url)
+  alert('連結已複製到剪貼簿')
 }
 
 // 組件掛載時載入數據
