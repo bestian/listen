@@ -65,7 +65,7 @@
 
             <div class="flex justify-between items-start">
               <div class="flex-1">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2">
                   會議ID: {{ transcription.meeting_id }}
                   <span v-if="transcription.outline" class="text-gray-600 text-sm">
                     AI自動摘要大綱以
