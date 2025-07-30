@@ -67,6 +67,11 @@
               <div class="flex-1">
                 <h3 class="text-lg font-semibold text-gray-900 mb-2">
                   會議ID: {{ transcription.meeting_id }}
+                  <span v-if="transcription.outline" class="text-gray-600 text-sm">
+                    AI自動摘要大綱以
+                    <a href="https://creativecommons.org/publicdomain/zero/1.0/deed.zh-hant" target="_blank" rel="noopener noreferrer" class="text-blue-600">CC0 1.0公有領域</a>
+                    授權公開
+                  </span>
                 </h3>
                 <div class="text-gray-600 text-sm mb-4">
                   <div v-html="getRenderedOutlinePreview(transcription.outline)" class="prose prose-sm max-w-none"></div>
