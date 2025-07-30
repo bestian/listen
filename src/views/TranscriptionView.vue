@@ -2,46 +2,35 @@
   <div class="container mx-auto px-4 py-8">
     <div class="max-w-6xl mx-auto">
       <!-- 頁面標題 -->
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-4">逐字稿管理</h1>
-        <p class="text-gray-600">查看和管理所有會議逐字稿</p>
-      </div>
-
-      <!-- 上傳區域 -->
-      <div v-if="props.user" class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 class="text-xl font-semibold mb-4">上傳逐字稿</h2>
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              選擇檔案
-            </label>
-            <input
-              type="file"
-              ref="fileInput"
-              @change="handleFileSelect"
-              accept=".txt,.srt,.md"
-              class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-            />
-          </div>
+      <div class="mb-8 grid md:grid-cols-2 gap-4">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 mb-4">逐字稿管理</h1>
+          <p class="text-gray-600 mb-4">查看和管理所有會議逐字稿</p>
+        </div>
+        <!-- 頂部上傳按鈕 -->
+        <div v-if="props.user" class="mb-2">
           <button
-            @click="uploadTranscription"
-            :disabled="!selectedFile || uploading"
-            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+            @click="scrollToUpload"
+            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
           >
-            {{ uploading ? '上傳中...由AI摘要中，請稍後...' : '上傳逐字稿' }}
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            上傳逐字稿
           </button>
         </div>
-      </div>
 
-      <!-- 未登入提示 -->
-      <div v-else class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-8">
-        <div class="flex items-center">
-          <svg class="w-5 h-5 text-yellow-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-          </svg>
-          <p class="text-yellow-700">請先登入才能上傳逐字稿</p>
+        <!-- 未登入提示 -->
+        <div v-else class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-8">
+          <div class="flex items-center">
+            <svg class="w-5 h-5 text-yellow-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+            </svg>
+            <p class="text-yellow-700">請先登入才能上傳逐字稿</p>
+          </div>
         </div>
       </div>
+
 
       <!-- 載入狀態 -->
       <div v-if="loading" class="flex justify-center items-center py-12">
@@ -54,7 +43,7 @@
       </div>
 
       <!-- 逐字稿列表 -->
-      <div v-if="!loading && transcriptions.length > 0" class="space-y-4">
+      <div v-if="!loading && transcriptions.length > 0" class="space-y-4 mb-8">
         <h2 class="text-xl font-semibold mb-4">逐字稿列表</h2>
 
         <input type="text" v-model="search" placeholder="搜尋..." class="w-full p-2 border border-gray-300 rounded-md mb-4" />
@@ -122,6 +111,32 @@
       <!-- 空狀態 -->
       <div v-if="!loading && transcriptions.length === 0" class="text-center py-12">
         <p class="text-gray-500">目前沒有逐字稿</p>
+      </div>
+
+      <!-- 上傳區域 - 移到下方 -->
+      <div v-if="props.user" class="bg-white rounded-lg shadow-md p-6 mt-8" ref="uploadSection">
+        <h2 class="text-xl font-semibold mb-4">上傳逐字稿</h2>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              選擇檔案
+            </label>
+            <input
+              type="file"
+              ref="fileInput"
+              @change="handleFileSelect"
+              accept=".txt,.srt,.md"
+              class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+          </div>
+          <button
+            @click="uploadTranscription"
+            :disabled="!selectedFile || uploading"
+            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+          >
+            {{ uploading ? '上傳中...由AI摘要中，請稍後...' : '上傳逐字稿' }}
+          </button>
+        </div>
       </div>
     </div>
 
@@ -200,9 +215,15 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { marked } from 'marked'
+
+// 定義類型
+interface Transcription {
+  meeting_id: string
+  outline: string
+}
 
 // 定義 props
 const props = defineProps({
@@ -228,12 +249,13 @@ const isAdmin = computed(() => {
 })
 
 // 響應式數據
-const transcriptions = ref([])
+const transcriptions = ref<Transcription[]>([])
 const loading = ref(true)
 const error = ref('')
 const uploading = ref(false)
-const selectedFile = ref(null)
-const fileInput = ref()
+const selectedFile = ref<File | null>(null)
+const fileInput = ref<HTMLInputElement>()
+const uploadSection = ref<HTMLElement>()
 
 // 大綱彈出視窗相關
 const showOutlineModal = ref(false)
@@ -261,7 +283,7 @@ const renderedOutline = computed(() => {
 })
 
 // 渲染大綱預覽（截斷後的markdown）
-const getRenderedOutlinePreview = (outline) => {
+const getRenderedOutlinePreview = (outline: string) => {
   if (!outline) return ''
   return marked(outline)
 }
@@ -289,15 +311,15 @@ const loadTranscriptions = async () => {
 }
 
 // 處理檔案選擇
-const handleFileSelect = (event) => {
-  const target = event.target
+const handleFileSelect = (event: Event) => {
+  const target = event.target as HTMLInputElement
   if (target.files && target.files.length > 0) {
     selectedFile.value = target.files[0]
   }
 }
 
 // 提取會議ID從檔案名稱
-const extractMeetingIdFromFilename = (filename) => {
+const extractMeetingIdFromFilename = (filename: string) => {
   // 假設檔案名稱格式為 transcript-2025-06-21.txt
   const match = filename.match(/transcript-(\d{4}-\d{2}-\d{2})/)
   if (match) {
@@ -307,7 +329,7 @@ const extractMeetingIdFromFilename = (filename) => {
 }
 
 // 檢查會議ID是否已存在
-const checkMeetingExists = (meetingId) => {
+const checkMeetingExists = (meetingId: string) => {
   return transcriptions.value.some(t => t.meeting_id === meetingId)
 }
 
@@ -371,7 +393,7 @@ const uploadTranscription = async () => {
 }
 
 // 顯示大綱
-const showOutline = (outline, meetingId) => {
+const showOutline = (outline: string, meetingId: string) => {
   currentOutline.value = outline
   currentOutlineMeetingId.value = meetingId
   showOutlineModal.value = true
@@ -410,7 +432,7 @@ const copyOutline = async () => {
 }
 
 // 複製逐字稿連結
-const copyTranscriptionLink = (meetingId) => {
+const copyTranscriptionLink = (meetingId: string) => {
   const url = `https://listen-r2.bestian.tw/${meetingId}.txt`
   navigator.clipboard.writeText(url)
   alert('連結已複製到剪貼簿')
@@ -474,7 +496,7 @@ const toggleEditOutline = async () => {
 }
 
 // 下載逐字稿
-const downloadTranscription = (meetingId) => {
+const downloadTranscription = (meetingId: string) => {
   const url = `https://listen-r2.bestian.tw/${meetingId}.txt`
   fetch(url, {
     headers: {
@@ -494,7 +516,7 @@ const downloadTranscription = (meetingId) => {
 }
 
 // 格式化會議ID (20250621 -> 2025-06-21)
-const formatMeetingId = (meetingId) => {
+const formatMeetingId = (meetingId: string) => {
   if (meetingId.length === 8) {
     return `${meetingId.substring(0, 4)}-${meetingId.substring(4, 6)}-${meetingId.substring(6, 8)}`
   }
@@ -505,6 +527,13 @@ const formatMeetingId = (meetingId) => {
 onMounted(() => {
   loadTranscriptions()
 })
+
+// 滾動到上傳區域
+const scrollToUpload = () => {
+  if (uploadSection.value) {
+    uploadSection.value.scrollIntoView({ behavior: 'smooth' })
+  }
+}
 </script>
 
 <style scoped>
