@@ -5,7 +5,9 @@
       <div class="mb-8 grid md:grid-cols-2 gap-4">
         <div>
           <h1 class="text-3xl font-bold text-gray-900 mb-4">逐字稿管理</h1>
-          <p class="text-gray-600 mb-4">查看和管理所有會議逐字稿</p>
+          <p class="text-gray-600 mb-4">查看和管理所有會議逐字稿，以
+            <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh-hant" target="_blank" rel="noopener noreferrer" class="text-blue-600">CC-BY-NC-ND 4.0</a>
+            授權公開。</p>
         </div>
         <!-- 頂部上傳按鈕 -->
         <div v-if="props.user" class="mb-2">
@@ -116,6 +118,11 @@
       <!-- 上傳區域 - 移到下方 -->
       <div v-if="props.user" class="bg-white rounded-lg shadow-md p-6 mt-8" ref="uploadSection">
         <h2 class="text-xl font-semibold mb-4">上傳逐字稿</h2>
+        <p class="text-gray-600 mb-4">上傳即同意逐字稿本身以
+          <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh-hant" target="_blank" rel="noopener noreferrer" class="text-blue-600">CC-BY-NC-ND 4.0</a>
+          授權公開，並同意由AI另作自動摘要，以
+          <a href="https://creativecommons.org/publicdomain/zero/1.0/deed.zh-hant" target="_blank" rel="noopener noreferrer" class="text-blue-600">CC0 1.0公有領域</a>
+          授權公開。</p>
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -153,6 +160,9 @@
         <div class="p-6 border-b border-gray-200">
           <div class="flex justify-between items-center">
             <h3 class="text-xl font-semibold">會議大綱 - {{ currentOutlineMeetingId }}</h3>
+            <p class="text-gray-600">以
+              <a href="https://creativecommons.org/publicdomain/zero/1.0/deed.zh-hant" target="_blank" rel="noopener noreferrer" class="text-blue-600">CC0 1.0公有領域</a>
+              授權公開</p>
             <button
               @click="closeOutlineModal"
               class="text-gray-400 hover:text-gray-600"

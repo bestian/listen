@@ -8,7 +8,9 @@
             <h1 class="text-3xl font-bold text-gray-900 mb-2">
               逐字稿詳情 - {{ formatMeetingId(meetingId) }}
             </h1>
-            <p class="text-gray-600">查看完整的會議逐字稿內容</p>
+            <p class="text-gray-600">完整的會議逐字稿內容，以
+              <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh-hant" target="_blank" rel="noopener noreferrer" class="text-blue-600">CC-BY-NC-ND 4.0</a>
+              授權公開。</p>
           </div>
           <button
             @click="$router.push('/transcription')"
