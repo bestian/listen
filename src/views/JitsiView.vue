@@ -31,6 +31,10 @@
           >
             加入會議
           </button>
+
+          <p class="text-gray-600 text-sm">
+            note: 請先登入，才能加入會議
+          </p>
         </div>
       </div>
 
@@ -513,6 +517,10 @@ export default {
       if (!this.jwt) {
         console.error('No JWT available');
         await this.getJwt();
+      }
+
+      if (!this.jwt) {
+        return;
       }
 
       try {
