@@ -32,7 +32,7 @@
             加入會議
           </button>
 
-          <p class="text-gray-600 text-sm">
+          <p class="text-gray-600 text-sm" v-if="!userData || !userData.uid">
             note: 請先登入，才能加入會議
           </p>
         </div>
