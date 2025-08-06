@@ -22,7 +22,8 @@
           <ul class="space-y-2 text-gray-400">
             <li>
               <a href="https://www.bestian.tw/sponsor" target="_blank" class="text-gray-400 text-underline">
-                以悠遊付贊助作者，支持作者繼續開發與維護
+                以悠遊付贊助作者，<br>
+                支持作者繼續開發與維護
               </a>
             </li>
           </ul>
