@@ -10,22 +10,24 @@
         </div>
 
         <div>
-          <h3 class="text-lg font-semibold mb-4">功能</h3>
-          <ul class="space-y-2 text-gray-400">
-            <li>視訊會議</li>
-            <li>即時逐字稿</li>
-            <li>會議記錄</li>
-            <li>資料匯出</li>
-          </ul>
-        </div>
-
-        <div>
           <h3 class="text-lg font-semibold mb-4">聯絡</h3>
           <ul class="space-y-2 text-gray-400">
             <li>GitHub：<a class="text-underline" href="https://github.com/bestian/listen" target="_blank">https://github.com/bestian/listen</a></li>
             <li>Email：<a class="text-underline" href="mailto:bestian@gmail.com" target="_blank">bestian@gmail.com</a></li>
           </ul>
         </div>
+
+        <div>
+          <h3 class="text-lg font-semibold mb-4">贊助</h3>
+          <ul class="space-y-2 text-gray-400">
+            <li>
+              <a href="https://www.bestian.tw/sponsor" target="_blank" class="text-gray-400 text-underline">
+                以悠遊付贊助作者，支持作者繼續開發與維護
+              </a>
+            </li>
+          </ul>
+        </div>
+
       </div>
     </div>
   </footer>
