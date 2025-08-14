@@ -17,6 +17,7 @@
     "markd": "^1.2.0",
     "marked": "^9.1.6",
     "vue": "^3.5.17",
+    "vue-i18n": "^9.14.5",
     "vue-router": "^4.5.1"
   },
   "devDependencies": {

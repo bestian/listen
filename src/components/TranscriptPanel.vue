@@ -5,15 +5,15 @@
       <div class="flex items-center justify-between mb-2">
         <div>
           <h3 class="text-lg font-bold text-gray-900">
-            逐字稿
-            <span class="text-sm text-gray-600">即時記錄會議內容</span>
+            {{ t('transcription.transcript') }}
+            <span class="text-sm text-gray-600">{{ t('transcription.realTimeMeetingContent') }}</span>
           </h3>
         </div>
 
         <button
           @click="$emit('close')"
           class="md:hidden p-2 hover:bg-gray-200 rounded-lg transition"
-          title="隱藏逐字稿"
+          :title="t('transcription.hideTranscript')"
         >
           <IconWrapper name="x" :size="20" />
         </button>
@@ -22,7 +22,7 @@
       <!-- 日期選擇器 -->
       <div class="mb-3">
         <div class="flex items-center gap-2">
-          <label class="text-sm font-medium text-gray-700">選擇日期:</label>
+          <label class="text-sm font-medium text-gray-700">{{ t('transcription.selectDate') }}</label>
           <input
             type="date"
             v-model="selectedDate"
@@ -42,20 +42,20 @@
             autoScroll ? 'bg-jade-green text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300',
           ]"
         >
-          自動捲動
+          {{ t('transcription.autoScroll') }}
         </button>
 
         <select v-model="fontSize" class="px-2 py-1 text-xs border border-gray-300 rounded">
-          <option value="small">小字體</option>
-          <option value="medium">中字體</option>
-          <option value="large">大字體</option>
+          <option value="small">{{ t('transcription.smallFont') }}</option>
+          <option value="medium">{{ t('transcription.mediumFont') }}</option>
+          <option value="large">{{ t('transcription.largeFont') }}</option>
         </select>
 
         <button
           @click="exportTranscript"
           class="px-3 py-1 text-xs bg-jade-green text-white rounded hover:bg-jade-green/90 transition"
         >
-          匯出逐字稿
+          {{ t('transcription.exportTranscript') }}
         </button>
       </div>
     </div>
@@ -68,7 +68,7 @@
     >
       <div v-if="Object.keys(transcriptData).length === 0" class="text-center text-gray-500 py-8">
         <IconWrapper name="file-text" :size="48" class="mx-auto mb-4 text-gray-300" />
-        <p>尚無逐字稿內容</p>
+        <p>{{ t('transcription.noTranscriptContent') }}</p>
       </div>
 
       <div
@@ -85,14 +85,14 @@
             <button
               @click="editEntry(index)"
               class="p-1 hover:bg-gray-100 rounded transition"
-              title="編輯"
+              :title="t('transcription.edit')"
             >
               <IconWrapper name="edit" :size="14" />
             </button>
             <button
               @click="deleteEntry(index)"
               class="p-1 hover:bg-red-100 text-red-600 rounded transition"
-              title="刪除"
+              :title="t('transcription.delete')"
             >
               <IconWrapper name="trash" :size="14" />
             </button>
@@ -111,14 +111,14 @@
         v-model="manualTranscript"
         class="w-full px-2 py-1 text-sm border border-gray-300 rounded resize-none"
         rows="3"
-        placeholder="手動輸入逐字稿內容..."
+        :placeholder="t('transcription.manualInputPlaceholder')"
       ></textarea>
       <div class="flex gap-2">
         <button
           @click="addManualTranscript"
           class="px-3 py-1 text-xs bg-jade-green text-white rounded hover:bg-jade-green/90 transition"
         >
-          新增逐字稿
+          {{ t('transcription.addTranscript') }}
         </button>
       </div>
     </div>
@@ -126,12 +126,12 @@
     <!-- 底部狀態列 -->
     <div class="flex-shrink-0 p-3 border-t border-gray-200 bg-gray-50">
       <div class="flex items-center justify-between text-xs text-gray-500">
-        <span>{{ Object.keys(transcriptData).length }} 條記錄</span>
+        <span>{{ Object.keys(transcriptData).length }} {{ t('transcription.records') }}</span>
         <div class="flex items-center gap-2">
           <div
             :class="['w-2 h-2 rounded-full', isConnected ? 'bg-jade-green' : 'bg-red-500']"
           ></div>
-          <span>{{ isConnected ? "已連接" : "已斷線" }}</span>
+          <span>{{ isConnected ? t('transcription.connected') : t('transcription.disconnected') }}</span>
         </div>
       </div>
     </div>
@@ -144,11 +144,11 @@
       <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] mx-4 flex flex-col">
         <!-- 彈出框標題 -->
         <div class="flex items-center justify-between p-6 border-b border-gray-200">
-          <h3 class="text-xl font-bold text-gray-900">編輯逐字稿</h3>
+          <h3 class="text-xl font-bold text-gray-900">{{ t('transcription.editTranscript') }}</h3>
           <button
             @click="cancelEdit"
             class="p-2 hover:bg-gray-100 rounded-lg transition"
-            title="關閉"
+            :title="t('transcription.close')"
           >
             <IconWrapper name="x" :size="24" />
           </button>
@@ -159,17 +159,17 @@
           <div class="space-y-4">
             <!-- 時間戳記 -->
             <div class="text-sm text-gray-500">
-              時間: {{ formatTimestamp(editingEntry.timestamp) }}
+              {{ t('transcription.time') }} {{ formatTimestamp(editingEntry.timestamp) }}
             </div>
 
             <!-- 發言者 -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                發言者
+                {{ t('transcription.speaker') }}
               </label>
               <input
                 v-model="editingEntry.speaker"
-                placeholder="請輸入發言者姓名"
+                :placeholder="t('transcription.speakerPlaceholder')"
                 class="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-jade-green focus:border-transparent"
               />
             </div>
@@ -177,11 +177,11 @@
             <!-- 內容 -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                內容
+                {{ t('transcription.content') }}
               </label>
               <textarea
                 v-model="editingEntry.text"
-                placeholder="請輸入逐字稿內容"
+                :placeholder="t('transcription.contentPlaceholder')"
                 class="w-full px-4 py-3 text-base border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-jade-green focus:border-transparent"
                 rows="12"
               ></textarea>
@@ -195,13 +195,13 @@
             @click="cancelEdit"
             class="px-6 py-3 text-base bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
           >
-            取消
+            {{ t('transcription.cancel') }}
           </button>
           <button
             @click="saveEntry"
             class="px-6 py-3 text-base bg-jade-green text-white rounded-lg hover:bg-jade-green/90 transition"
           >
-            儲存
+            {{ t('transcription.save') }}
           </button>
         </div>
       </div>
@@ -212,6 +212,9 @@
 <script setup>
 import { ref, computed, nextTick, watch } from "vue";
 import IconWrapper from "./IconWrapper.vue";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 // Props
 const props = defineProps({
@@ -384,7 +387,7 @@ const cancelEdit = () => {
 };
 
 const deleteEntry = (index) => {
-  if (confirm("確定要刪除這條逐字稿嗎？")) {
+  if (confirm(t("transcription.confirmDelete"))) {
     emit("delete-data", Object.values(transcriptData.value)[index].timestamp);
   }
 };

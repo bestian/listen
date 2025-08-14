@@ -3,7 +3,7 @@
     <div class="w-full px-4 md:mx-auto">
       <div class="flex justify-between items-center h-16">
         <router-link to="/" class="flex items-center">
-          <span class="text-xl font-bold">深度聆聽</span>
+          <span class="text-xl font-bold">{{ t('navigation.home') }}</span>
         </router-link>
 
         <div class="hidden lg:flex items-center space-x-1 md:space-x-2 lg:space-x-6 xl:space-x-10">
@@ -20,12 +20,15 @@
         </div>
 
         <div class="flex items-center space-x-2">
+          <!-- 語言切換器 -->
+          <LanguageSwitcher />
+          
           <!-- 登入狀態顯示 -->
           <div v-if="user" class="flex items-center space-x-2">
             <router-link
               to="/profile"
               class="flex items-center space-x-2 hover:text-democratic-red transition"
-              title="個人資料"
+              :title="t('navigation.profile')"
             >
               <img
                 v-if="userData && userData.photoURL"
@@ -43,7 +46,7 @@
           <!-- 未登入顯示登入按鈕 -->
           <div v-else>
             <button @click="handleShowLogin" class="text-sm hover:text-democratic-red transition">
-              登入
+              {{ t('common.login') }}
             </button>
           </div>
 
@@ -70,7 +73,7 @@
 
         <button v-if="user" @click="handleLogout" class="flex items-center gap-2 py-2 hover:text-democratic-red transition">
           <IconWrapper name="log-out" :size="16" :stroke="'#ffffff'" />
-          登出
+          {{ t('common.logout') }}
         </button>
       </div>
     </div>
@@ -78,19 +81,23 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import IconWrapper from './IconWrapper.vue'
+import LanguageSwitcher from './LanguageSwitcher.vue'
+
+const { t } = useI18n()
 
 const route = useRoute()
 const mobileMenuOpen = ref(false)
 
-const navItems = [
-  { href: '/', label: '首頁', icon: 'home' },
-  { href: '/meeting', label: '視訊會議', icon: 'video' },
-  { href: '/transcription', label: '逐字稿', icon: 'file-text' },
-  { href: '/profile', label: '個人資料', icon: 'user' },
-]
+const navItems = computed(() => [
+  { href: '/', label: t('navigation.home'), icon: 'home' },
+  { href: '/meeting', label: t('meeting.title'), icon: 'video' },
+  { href: '/transcription', label: t('transcription.title'), icon: 'file-text' },
+  { href: '/profile', label: t('navigation.profile'), icon: 'user' },
+])
 
 const toggleMobileMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value

@@ -14,14 +14,14 @@
         class="flex items-center justify-center h-full bg-gray-100"
       >
         <div class="text-center">
-          <h2 class="text-2xl font-bold mb-4 text-gray-800">深度聆聽 視訊會議</h2>
-          <p class="text-gray-600 mb-6">準備加入會議室：{{ room }}</p>
+          <h2 class="text-2xl font-bold mb-4 text-gray-800">{{ t('meeting.deepListeningVideoMeeting') }}</h2>
+          <p class="text-gray-600 mb-6">{{ t('meeting.prepareToJoinRoom') }}：{{ room }}</p>
 
           <!-- 可以自訂加入會議的名字，預設為 userData.name -->
           <input
             v-model="joinMeetingName"
             class="w-full px-4 py-2 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jade-green"
-            placeholder="請輸入您的名字"
+            :placeholder="t('meeting.enterYourName')"
           />
 
           <!-- 加入會議按鈕 -->
@@ -29,11 +29,11 @@
             @click="joinMeeting"
             class="px-6 py-3 bg-jade-green text-white rounded-lg hover:bg-jade-green/90 transition-colors"
           >
-            加入會議
+            {{ t('meeting.joinMeetingButton') }}
           </button>
 
           <p class="text-gray-600 text-sm" v-if="!userData || !userData.uid">
-            note: 請先登入，才能加入會議
+            {{ t('meeting.loginNote') }}
           </p>
         </div>
       </div>
@@ -82,6 +82,7 @@
           class="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-4 w-4 h-16 bg-gray-300 rounded-l-lg cursor-col-resize flex items-center justify-center hover:bg-gray-400 transition"
           @mousedown="startDragging"
           @touchstart="startDragging"
+          :title="t('meeting.dragHandle')"
         >
           <div class="w-1 h-8 bg-gray-500 rounded"></div>
         </div>
@@ -120,7 +121,7 @@
       >
         <div class="p-4 sm:p-3">
           <div class="flex items-center justify-between mb-4 sm:mb-1">
-            <h3 class="text-lg sm:text-xl font-bold text-gray-800">音訊設定</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800">{{ t('meeting.audioSettings') }}</h3>
             <button
               @click="hideAudioSettings"
               class="text-gray-400 hover:text-gray-600 transition-colors p-1"
@@ -132,11 +133,11 @@
           <!-- 音訊源選擇 -->
           <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-3">
-              選擇音訊源
+              {{ t('meeting.selectAudioSource') }}
             </label>
 
             <div v-if="audioDevices.length === 0" class="text-gray-500 text-sm mb-4">
-              載入音訊設備中...
+              {{ t('meeting.loadingAudioDevices') }}
             </div>
 
             <div v-else class="space-y-2 sm:space-y-0">
@@ -163,7 +164,7 @@
                     </div>
                   </div>
                   <div class="flex-1">
-                    <div class="font-medium text-gray-800">{{ device.label || '未知設備' }}</div>
+                    <div class="font-medium text-gray-800">{{ device.label || t('meeting.unknownDevice') }}</div>
                     <div class="text-xs text-gray-500">{{ device.deviceId.length > 10 ? device.deviceId.slice(0, 10) + '...' : device.deviceId }}</div>
                   </div>
                 </div>
@@ -173,7 +174,7 @@
                   v-if="isTestingAudio && selectedAudioDeviceId == device.deviceId"
                   class="px-4 sm:px-3 pb-4 sm:pb-3"
                 >
-                  <div class="text-xs text-gray-600 mb-2">音訊音量</div>
+                  <div class="text-xs text-gray-600 mb-2">{{ t('meeting.audioVolume') }}</div>
                   <div class="flex items-end space-x-1 h-12">
                     <div
                       v-for="(level, index) in audioLevels"
@@ -188,7 +189,7 @@
                     ></div>
                   </div>
                   <div class="text-xs text-gray-500 mt-1 text-center">
-                    請對著麥克風說話來測試
+                    {{ t('meeting.speakToTest') }}
                   </div>
                 </div>
               </div>
@@ -203,8 +204,8 @@
               class="w-full px-4 py-3 sm:py-2 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               :class="isTestingAudio ? 'bg-red-500 hover:bg-red-600' : 'bg-jade-green hover:bg-jade-green/90'"
             >
-              <span v-if="isTestingAudio">停止測試</span>
-              <span v-else>測試音訊設備</span>
+              <span v-if="isTestingAudio">{{ t('meeting.stopTest') }}</span>
+              <span v-else>{{ t('meeting.testAudioDevice') }}</span>
             </button>
           </div>
 
@@ -214,13 +215,13 @@
               @click="saveAudioSettings"
               class="flex-1 px-4 py-3 sm:py-2 bg-democratic-red text-white rounded-lg hover:bg-democratic-red/90 transition-colors"
             >
-              儲存
+              {{ t('meeting.save') }}
             </button>
             <button
               @click="hideAudioSettings"
               class="flex-1 px-4 py-3 sm:py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
             >
-              取消
+              {{ t('meeting.cancel') }}
             </button>
           </div>
         </div>
@@ -234,7 +235,7 @@
         v-if="isMobile && userData && userData.uid"
         @click="toggleAudioSettings"
         class="p-4 rounded-full shadow-lg transition-all duration-300 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-800 border border-gray-300 flex items-center justify-center hover:scale-105"
-        title="音訊設定"
+        :title="t('meeting.audioSettingsButton')"
       >
         <IconWrapper name="settings" :size="24" />
       </button>
@@ -250,7 +251,7 @@
               ? 'bg-red-500 text-white hover:bg-red-600 animate-pulse'
               : 'bg-purple-500 text-white hover:bg-purple-600'
           ]"
-          :title="isRecordingAudio ? `停止錄音轉錄 (${recordingTimeLeft}秒)` : '開始錄音轉錄 (最多120秒)'"
+          :title="isRecordingAudio ? `${t('meeting.stopAudioRecording')} (${recordingTimeLeft}${t('meeting.recordingTimeLeft')})` : t('meeting.startAudioRecordingDesc')"
         >
           <IconWrapper
             :name="isRecordingAudio ? 'square' : 'mic'"
@@ -268,7 +269,7 @@
             v-if="isTranscripting"
             class="absolute -bottom-2 right-12 transform -translate-x-1/2 bg-white text-red-500 text-xs font-bold rounded-full w-36 h-6 flex items-center justify-center border-2 border-red-500"
           >
-            轉錄中，請稍候...
+            {{ t('meeting.transcribingPleaseWait') }}
           </div>
         </button>
 
@@ -277,7 +278,7 @@
           v-if="!isMobile && userData && userData.uid"
           @click="toggleAudioSettings"
           class="absolute -top-1 -right-1 w-7 h-7 rounded-full shadow-lg transition-all duration-200 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-700 border border-gray-300 flex items-center justify-center hover:scale-110 audio-settings-button z-10"
-          title="音訊設定"
+          :title="t('meeting.audioSettingsButton')"
         >
           <IconWrapper name="chevron-up" :size="14" />
         </button>
@@ -293,7 +294,7 @@
             ? 'bg-democratic-red text-white hover:bg-democratic-red/90'
             : 'bg-jade-green text-white hover:bg-jade-green/90'
         ]"
-        :title="showTranscript ? '隱藏逐字稿' : '顯示逐字稿'"
+        :title="showTranscript ? t('meeting.hideTranscript') : t('meeting.showTranscript')"
       >
         <IconWrapper
           :name="showTranscript ? 'x' : 'file-text'"
@@ -309,6 +310,7 @@ import TranscriptPanel from '../components/TranscriptPanel.vue';
 import IconWrapper from '../components/IconWrapper.vue';
 import { get, onValue, ref as dbRef, set } from 'firebase/database';
 import { database } from '../lib/firebase';
+import { useI18n } from 'vue-i18n';
 
 export default {
   name: 'JitsiView',
@@ -318,6 +320,10 @@ export default {
   },
   props: {
     userData: { type: Object, required: false, default: () => ({}) }
+  },
+  setup() {
+    const { t } = useI18n();
+    return { t };
   },
   data() {
     return {

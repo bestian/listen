@@ -12,7 +12,7 @@
         class="w-5 h-5 mr-2"
       />
       <span v-if="loading" class="animate-spin mr-2">⏳</span>
-      {{ loading ? '登入中...' : '使用 Google 登入' }}
+      {{ loading ? t('auth.loggingIn') : t('auth.googleLogin') }}
     </button>
   </div>
 </template>
@@ -20,6 +20,9 @@
 <script setup>
 import { ref, defineProps, defineEmits } from 'vue'
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   inApp: {
@@ -36,7 +39,7 @@ const emit = defineEmits(['login-success'])
 
 const handleGoogleLogin = async () => {
   if (props.inApp) {
-    alert('本系統不支援Facebook, Line等app內部瀏覽，請用一般瀏覽器開啟，方可登入，謝謝')
+    alert(t('auth.inAppBrowserNotSupported'))
     return
   }
 
