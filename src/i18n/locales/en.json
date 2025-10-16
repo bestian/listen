@@ -140,7 +140,9 @@
     "startAudioRecordingDesc": "Start audio recording (max 120 seconds)",
     "stopAudioRecordingDesc": "Stop audio recording",
     "transcriptPanel": "Transcript Panel",
-    "dragHandle": "Drag Handle"
+    "dragHandle": "Drag Handle",
+    "tipBannerMessage": "To enable mic/camera, click once on the black area, then press the mic/camera icons at the bottom-left.",
+    "tipBannerDismiss": "Dismiss"
   },
   "footer": {
     "title": "Deep Listening",

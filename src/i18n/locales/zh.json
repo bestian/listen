@@ -140,7 +140,9 @@
     "startAudioRecordingDesc": "開始錄音轉錄 (最多120秒)",
     "stopAudioRecordingDesc": "停止錄音轉錄",
     "transcriptPanel": "逐字稿面板",
-    "dragHandle": "拖拽手柄"
+    "dragHandle": "拖拽手柄",
+    "tipBannerMessage": "若要啟用麥克風/鏡頭，請先在黑色空白處點一下，再按左下角的麥克風/鏡頭圖示。",
+    "tipBannerDismiss": "知道了"
   },
   "footer": {
     "title": "深度聆聽",
